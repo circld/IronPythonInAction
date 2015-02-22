@@ -11,11 +11,13 @@
     <WorkingDirectory>.</WorkingDirectory>
     <IsWindowsApplication>True</IsWindowsApplication>
     <InterpreterId>{80659ab7-4d53-4e0c-8588-a766116cbd46}</InterpreterId>
-    <LaunchProvider>IronPython (.NET) launcher</LaunchProvider>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
     <InterpreterVersion>2.7</InterpreterVersion>
     <OutputPath>.</OutputPath>
     <Name>MultiDoc</Name>
     <RootNamespace>MultiDoc</RootNamespace>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <DebugStdLib>True</DebugStdLib>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
