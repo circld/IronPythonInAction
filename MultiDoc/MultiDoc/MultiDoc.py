@@ -5,11 +5,15 @@ clr.AddReference('System.Windows.Forms')
 from System.Drawing import Size
 from System.Windows.Forms import (
     Application, DockStyle, Form, ScrollBars,
-    TabAlignment, TabControl, TabPage, TextBox
+    TabAlignment, TabControl, TabPage, TextBox,
+    SaveFileDialog, MessageBox, MessageBoxButtons,
+    MessageBoxIcon
 )
+from System.IO import Directory, Path, StreamWriter
 
 # Model
 class Document(object):
+
     def __init__(self, fileName=None):
         self.fileName = fileName
         self.pages = list()
@@ -31,6 +35,7 @@ class Document(object):
 
 
 class Page(object):
+
     def __init__(self, title):
         self.title = title
         self.text = ''
@@ -38,6 +43,7 @@ class Page(object):
 
 # View
 class MyForm(Form):
+
     def __init__(self):
         self.Text = 'MultiDoc Editor'
         self.MinimumSize = Size(150, 150)
@@ -55,6 +61,7 @@ class MyForm(Form):
 # Controller
 class TabController(object):
     """Connects tabControl and Document"""
+
     def __init__(self, tabControl, document):
         self.tabControl = tabControl  # link to view
         self.document = document  # link to model
@@ -88,8 +95,6 @@ class TabController(object):
     def maintainIndex(self, sender, event):
         self.updateDocument()
         self.index = self.tabControl.SelectedIndex
-        # why is ^ necessary? updateDocument set index = self.index
-        # and selected based on that...isn't this redundant?
 
     def updateDocument(self):
         """
@@ -99,6 +104,73 @@ class TabController(object):
         tabPage = self.tabControl.TabPages[index]
         textBox = tabPage.Controls[0]  # nb. python style subsetting
         self.document[index].text = textBox.Text
+
+# Commands
+filter = 'Text files (*.txt)|*.txt|All files (*.*)|*.*'
+class SaveCommand(object):
+
+    title = 'Save Document'
+
+    def __init__(self, document, tabController):
+        self.document = document
+        self.tabController = tabController
+        self.saveDialog = SaveFileDialog()
+        self.saveDialog.Filter = filter
+        self.saveDialog.Title = self.title
+
+    def execute(self):
+        fileName = self.document.fileName
+        text = self.getText()
+
+        directory = Path.GetDirectoryName(fileName)
+        directoryExists = Directory.Exists(directory)
+        if fileName is None or not directoryExists:
+            self.promptAndSave(text)
+        else:
+            self.saveFile(fileName, text)
+
+    def getText(self):
+        self.tabController.updateDocument()
+        return self.document[0].text
+
+    def promptAndSave(self, text):
+        saveDialog = self.saveDialog
+        if saveDialog.ShowDialog() == DialogResult.OK:
+            fileName = saveDialog.FileName
+            if self.saveFile(fileName, text):
+                self.document.fileName = filename
+
+    def saveFile(self, fileName, text):
+        try:
+            writer = StreamWriter(fileName)
+            writer.Write(text)
+            writer.Close()
+            return True
+        except IOError, e:
+            name = Path.GetFileName(fileName)
+            MessageBox.Show(
+                'Could not write file %s\r\nThe error was:\r\n%s' %
+                (name, e),
+                'Error Saving File',
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error
+            )
+            return False
+
+
+class SaveAsCommand(SaveCommand):
+
+    title = "Save Document As"
+
+    def execute(self):
+        fileName = self.document.fileName
+        text = self.getText()
+        ' If fileName exists, set initial dialog directory to fileName directory'
+        if fileName is not None:
+            name = Path.GetFileName(fileName)
+            directory = Path.GetDirectoryName(fileName)
+            self.saveDialog.InitialDirectory = directory
+        self.promptAndSave(text)
 
 
 Application.EnableVisualStyles()
