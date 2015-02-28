@@ -1,15 +1,27 @@
+# Button icons (C) 2013 Yusuke Kamiyamane. All rights reserved.
+
+
 import clr
 clr.AddReference('System.Drawing')
 clr.AddReference('System.Windows.Forms')
 
-from System.Drawing import Size
+from System.Drawing import Bitmap, Color, Size
 from System.Windows.Forms import (
-    Application, DockStyle, Form, ScrollBars,
-    TabAlignment, TabControl, TabPage, TextBox,
-    SaveFileDialog, MessageBox, MessageBoxButtons,
-    MessageBoxIcon
+    Application, DialogResult, DockStyle, Form, 
+    Keys, MenuStrip, MessageBox, MessageBoxButtons,
+    MessageBoxDefaultButton, MessageBoxIcon,
+    ScrollBars, SaveFileDialog, TabAlignment, 
+    TabControl, TabPage, TextBox,
+    ToolStripItemDisplayStyle, ToolStrip,
+    ToolStripButton, ToolStripGripStyle,
+    ToolStripMenuItem,
 )
 from System.IO import Directory, Path, StreamWriter
+
+executablePath = __file__
+if executablePath is None:
+    Application.ExecutablePath
+executableDirectory = Path.GetDirectoryName(executablePath)
 
 # Model
 class Document(object):
@@ -48,14 +60,94 @@ class MyForm(Form):
         self.Text = 'MultiDoc Editor'
         self.MinimumSize = Size(150, 150)
 
-        self.tabControl = TabControl()
+        tab = self.tabControl = TabControl()
         self.tabControl.Dock = DockStyle.Fill
         self.tabControl.Alignment = TabAlignment.Bottom
         self.Controls.Add(self.tabControl)
 
-        self.document = Document()
+        doc = self.document = Document()
         # all interaction with Document via controller
         self.tabController = TabController(self.tabControl, self.document)
+
+        # initializing form components using class methods
+        self.initializeCommands()
+        self.initializeToolbar()
+        self.initializeMenus()
+
+    def initializeCommands(self):
+        tabC = self.tabController
+        doc = self.document
+        self.saveCommand = SaveCommand(doc, tabC)
+        self.saveAsCommand = SaveAsCommand(doc, tabC)
+
+    def initializeToolbar(self):
+        self.iconPath = Path.Combine(executableDirectory, 'icons', 'icons')
+        self.toolBar = ToolStrip()  # Toolbar (.NET 1.0) is apparently garbage
+        self.toolBar.Dock = DockStyle.Top
+        self.toolBar.GripStyle = ToolStripGripStyle.Hidden
+        
+        self.addToolbarItem('Save', 
+                            lambda sender, event : self.saveCommand.execute(),
+                            'disk-black.png')
+        self.Controls.Add(self.toolBar)
+
+    def addToolbarItem(self, name, clickHandler, iconFile):
+        button = ToolStripButton()
+        button.ToolTipText = name
+        button.Image = Bitmap(Path.Combine(self.iconPath, iconFile))
+        button.ImageTransparentColor = Color.Magenta
+        button.DisplayStyle = ToolStripItemDisplayStyle.Image
+        button.Click += clickHandler
+
+        # add button to toolbar
+        self.toolBar.Items.Add(button)
+
+    def initializeMenus(self):
+        menuStrip = MenuStrip()
+        menuStrip.Dock = DockStyle.Top
+
+        fileMenu = self.createMenuItem('&File')
+
+        saveKeys = Keys.Control | Keys.S
+        saveMenuItem = self.createMenuItem(
+            '&Save...',
+            handler = lambda sender, event : self.saveCommand.execute(),
+            keys=saveKeys
+        )
+
+        saveAsKeys = Keys.Control | Keys.Shift | Keys.S
+        saveAsMenuItem = self.createMenuItem(
+            'S&ave As...',
+            lambda sender, event : self.saveAsCommand.execute(),
+            saveAsKeys
+        )
+
+        # Add menu items to menu, menu to menus
+        fileMenu.DropDownItems.Add(saveMenuItem)
+        fileMenu.DropDownItems.Add(saveAsMenuItem)
+        menuStrip.Items.Add(fileMenu)
+
+        # Add to form controls
+        self.Controls.Add(menuStrip)
+
+
+    def createMenuItem(self, text, handler=None, keys=None):
+        """ 
+        Creates both menus (fileMenu) and menu items (saveMenuItem);
+        hence the need for default values
+        """
+        menuItem = ToolStripMenuItem()
+        menuItem.Text = text
+
+        # logic for menu dropdown item
+        if keys:
+            menuItem.ShortcutKeys = keys
+        if handler:
+            menuItem.Click += handler
+
+        # return rather than add since function is used for both menus & menu
+        # items (logic differs from addToolbarItem() above)
+        return menuItem
 
 
 # Controller
@@ -138,7 +230,7 @@ class SaveCommand(object):
         if saveDialog.ShowDialog() == DialogResult.OK:
             fileName = saveDialog.FileName
             if self.saveFile(fileName, text):
-                self.document.fileName = filename
+                self.document.fileName = fileName
 
     def saveFile(self, fileName, text):
         try:
