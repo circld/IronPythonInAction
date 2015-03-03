@@ -10,10 +10,9 @@ from System.Windows.Forms import (
     Application, DockStyle, Form, 
     Keys, MenuStrip, MessageBox, MessageBoxButtons,
     MessageBoxDefaultButton, MessageBoxIcon,
-    ScrollBars, TabAlignment, 
-    TabControl, TabPage, TextBox,
-    ToolStripItemDisplayStyle, ToolStrip,
-    ToolStripButton, ToolStripGripStyle,
+    ScrollBars, TabAlignment, TabControl, 
+    TabPage, TextBox, ToolStripItemDisplayStyle, 
+    ToolStrip, ToolStripButton, ToolStripGripStyle,
     ToolStripMenuItem,
 )
 from System.IO import Directory, Path
