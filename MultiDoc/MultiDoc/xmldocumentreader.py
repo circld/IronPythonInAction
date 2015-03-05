@@ -68,7 +68,8 @@ class XmlDocumentReader(object):
                 )
 
     def onText(self, reader):
-        element = self._currentElement  # text is not own element
+        # text is not own element (nb. reader.Name = '')
+        element = self._currentElement
         textHandler = self._elementHandlers.get(element,
                                                 MISSING_HANDLERS)[1]
         if textHandler:
@@ -77,6 +78,5 @@ class XmlDocumentReader(object):
     def onEndElement(self, reader):
         endHandler = self._elementHandlers.get(reader.Name,
                                                MISSING_HANDLERS)[2]
-
         if endHandler:
-            endHandler(reader.LineNumber)  # why pass line #?
+            endHandler(reader.LineNumber)  # pass line # for error msgs
