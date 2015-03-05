@@ -68,3 +68,4 @@ class SaveAsCommand(SaveCommand):
             directory = Path.GetDirectoryName(fileName)
             self.saveDialog.InitialDirectory = directory
         self.promptAndSave(text)
+
