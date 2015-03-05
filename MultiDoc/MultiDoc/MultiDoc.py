@@ -1,31 +1,32 @@
 # Button icons (C) 2013 Yusuke Kamiyamane. All rights reserved.
 
-
 import clr
 clr.AddReference('System.Drawing')
 clr.AddReference('System.Windows.Forms')
 
 from System.Drawing import Bitmap, Color, Size
+from System.IO import Path
 from System.Windows.Forms import (
     Application, DockStyle, Form, 
-    Keys, MenuStrip, MessageBox, MessageBoxButtons,
-    MessageBoxDefaultButton, MessageBoxIcon,
-    ScrollBars, TabAlignment, TabControl, 
-    TabPage, TextBox, ToolStripItemDisplayStyle, 
-    ToolStrip, ToolStripButton, ToolStripGripStyle,
+    Keys, MenuStrip, TabAlignment, TabControl, 
+    ToolStripItemDisplayStyle, ToolStrip,
+    ToolStripButton, ToolStripGripStyle,
     ToolStripMenuItem,
 )
-from System.IO import Directory, Path
-# import other from other user-written modules
-from savecommands import SaveCommand, SaveAsCommand
-from model import Document
 
-executablePath = __file__
+# import other from other user-written modules
+from model import Document
+from opencommands import OpenCommand
+from savecommands import SaveCommand, SaveAsCommand
+from tabcontroller import TabController
+
+
+executablePath = __file__  # this file's path
 if executablePath is None:
-    Application.ExecutablePath
+    executablePath = Application.ExecutablePath
 executableDirectory = Path.GetDirectoryName(executablePath)
 
-# View
+
 class MyForm(Form):
 
     def __init__(self):
@@ -37,20 +38,21 @@ class MyForm(Form):
         self.tabControl.Alignment = TabAlignment.Bottom
         self.Controls.Add(self.tabControl)
 
-        doc = self.document = Document()
         # all interaction with Document via controller
-        self.tabController = TabController(self.tabControl, self.document)
+        self.tabController = TabController(tab)
 
         # initializing form components using class methods
         self.initializeCommands()
         self.initializeToolbar()
         self.initializeMenus()
+        self.initializeObservers()
+        self.document = Document()
 
     def initializeCommands(self):
         tabC = self.tabController
-        doc = self.document
-        self.saveCommand = SaveCommand(doc, tabC)
-        self.saveAsCommand = SaveAsCommand(doc, tabC)
+        self.saveCommand = SaveCommand(tabC)
+        self.saveAsCommand = SaveAsCommand(tabC)
+        self.openCommand = OpenCommand(self)
 
     def initializeToolbar(self):
         self.iconPath = Path.Combine(executableDirectory, 'icons', 'icons')
@@ -58,6 +60,9 @@ class MyForm(Form):
         self.toolBar.Dock = DockStyle.Top
         self.toolBar.GripStyle = ToolStripGripStyle.Hidden
         
+        self.addToolbarItem('Open', 
+                            lambda sender, event : self.openCommand.execute(),
+                            'folder-open.png')
         self.addToolbarItem('Save', 
                             lambda sender, event : self.saveCommand.execute(),
                             'disk-black.png')
@@ -80,28 +85,35 @@ class MyForm(Form):
 
         fileMenu = self.createMenuItem('&File')
 
+        openKeys = Keys.Control | Keys.O
+        openMenuItem = self.createMenuItem(
+            '&Open...',
+            handler=lambda sender, event : self.openCommand.execute(),
+            keys=openKeys
+        )
+
         saveKeys = Keys.Control | Keys.S
         saveMenuItem = self.createMenuItem(
             '&Save...',
-            handler = lambda sender, event : self.saveCommand.execute(),
+            handler=lambda sender, event : self.saveCommand.execute(),
             keys=saveKeys
         )
 
         saveAsKeys = Keys.Control | Keys.Shift | Keys.S
         saveAsMenuItem = self.createMenuItem(
             'S&ave As...',
-            lambda sender, event : self.saveAsCommand.execute(),
-            saveAsKeys
+            handler=lambda sender, event : self.saveAsCommand.execute(),
+            keys=saveAsKeys
         )
 
         # Add menu items to menu, menu to menus
+        fileMenu.DropDownItems.Add(openMenuItem)
         fileMenu.DropDownItems.Add(saveMenuItem)
         fileMenu.DropDownItems.Add(saveAsMenuItem)
         menuStrip.Items.Add(fileMenu)
 
         # Add to form controls
         self.Controls.Add(menuStrip)
-
 
     def createMenuItem(self, text, handler=None, keys=None):
         """ 
@@ -121,55 +133,22 @@ class MyForm(Form):
         # items (logic differs from addToolbarItem() above)
         return menuItem
 
+    def initializeObservers(self):
+        self.observers = [
+            self.saveCommand,
+            self.saveAsCommand,
+            self.tabController
+        ]
 
-# Controller
-class TabController(object):
-    """Connects tabControl and Document"""
+    @property
+    def document(self):
+        return self._document
 
-    def __init__(self, tabControl, document):
-        self.tabControl = tabControl  # link to view
-        self.document = document  # link to model
-
-        [self.addTabPage(page.title, page.text) for page in self.document]
-        
-        self.index = self.tabControl.SelectedIndex
-        # selects first index (before form shown, index = -1 & 
-        # SelectedIndexChanged event not fired)
-        if self.index == -1:
-            self.index = self.tabControl.SelectedIndex = 0  
-        self.tabControl.SelectedIndexChanged += self.maintainIndex
-
-    def addTabPage(self, label, text):
-        """Adds a tabbed page"""
-        tabPage = TabPage()
-        tabPage.Text = label
-
-        textBox = TextBox()
-        textBox.Multiline = True
-        textBox.Dock = DockStyle.Fill
-        textBox.ScrollBars = ScrollBars.Vertical
-        textBox.AcceptsReturn = True
-        textBox.AcceptsTab = True
-        textBox.WordWrap = True
-        textBox.Text = text
-
-        tabPage.Controls.Add(textBox)  # add textbox to tabPage control
-        self.tabControl.TabPages.Add(tabPage)  # add tabPage to tabControl.TabPages
-
-    def maintainIndex(self, sender, event):
-        self.updateDocument()
-        self.index = self.tabControl.SelectedIndex
-
-    def updateDocument(self):
-        """
-        Records text from currently selected tab back into model
-        """
-        index = self.index
-        tabPage = self.tabControl.TabPages[index]
-        textBox = tabPage.Controls[0]  # nb. python style subsetting
-        self.document[index].text = textBox.Text
-
-# Commands
+    @document.setter
+    def document(self, document):
+        self._document = document
+        for observer in self.observers:
+            observer.document = document
 
 
 Application.EnableVisualStyles()

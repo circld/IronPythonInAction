@@ -24,6 +24,7 @@ class OpenCommand(object):
         directory = Path.GetDirectoryName(fileName)
         directoryExists = Directory.Exists(directory)
         openFileDialog = self.openFileDialog
+        document = None
 
         if fileName is not None and directoryExists:
             openFileDialog.InitialDirectory = directory
@@ -42,7 +43,7 @@ class OpenCommand(object):
         except (IOError, XmlException), e:
             name = Path.GetFileName(fileName)
             MessageBox.Show(
-                'Could not read file "%s"\r\nThe error was:\r\n%s %
+                'Could not read file "%s"\r\nThe error was:\r\n%s' %
                 (name, str(e)),
                 "Error Saving File",
                 MessageBoxButtons.OK,

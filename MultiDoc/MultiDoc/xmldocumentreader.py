@@ -57,15 +57,15 @@ class XmlDocumentReader(object):
         while reader.MoveToNextAttribute():
             attributes[reader.Name] = reader.Value
 
-            # if unknown/unhandled element, default to MISSING_HANDLERS
-            startHandler = self._elementHandlers.get(name,
-                                                     MISSING_HANDLERS)[0]
-            if startHandler:
-                startHandler(reader.LineNumber, attributes)
-            else:
-                raise XmlException(
-                    'invalid data at line %d' % reader.LineNumber()
-                )
+        # if unknown/unhandled element, default to MISSING_HANDLERS
+        startHandler = self._elementHandlers.get(name,
+                                                 MISSING_HANDLERS)[0]
+        if startHandler:
+            startHandler(reader.LineNumber, attributes)
+        else:
+            raise XmlException(
+                'invalid data at line %d' % reader.LineNumber()
+            )
 
     def onText(self, reader):
         # text is not own element (nb. reader.Name = '')

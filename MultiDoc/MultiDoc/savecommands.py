@@ -9,8 +9,8 @@ class SaveCommand(object):
 
     title = 'Save Document'
 
-    def __init__(self, document, tabController):
-        self.document = document
+    def __init__(self, tabController):
+        self.document = None
         self.tabController = tabController
         self.saveDialog = SaveFileDialog()
         self.saveDialog.Filter = filter

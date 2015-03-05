@@ -49,6 +49,9 @@
     <Compile Include="savecommands.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="tabcontroller.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="xmldocumentreader.py">
       <SubType>Code</SubType>
     </Compile>
