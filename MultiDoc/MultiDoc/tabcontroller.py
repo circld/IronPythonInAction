@@ -25,6 +25,24 @@ class TabController(object):
             self.index = self.tabControl.SelectedIndex = 0
         self.tabControl.SelectedIndexChanged += self.maintainIndex
 
+    @property
+    def hasPages(self):
+        return self.tabControl.SelectedIndex != -1  # index = -1 if no pages
+
+    @property
+    def title(self):
+        if self.hasPages:
+            index = self.tabControl.SelectedIndex
+            return self.document.pages[index].title
+
+    @title.setter
+    def title(self, title):
+        if self.hasPages:
+            index = self.tabControl.SelectedIndex
+            page = self.document.pages[index]
+            page.title = title
+            self.tabControl.SelectedTab.Text = title
+
     def addTabPage(self, label, text):
         """Adds a tabbed page"""
         tabPage = TabPage()
@@ -43,7 +61,8 @@ class TabController(object):
         self.tabControl.TabPages.Add(tabPage)  # add tabPage to tabControl.TabPages
 
     def maintainIndex(self, sender, event):
-        self.updateDocument()  # save currently selected page to model
+        if self.hasPages:
+            self.updateDocument()  # save currently selected page to model
         self.index = self.tabControl.SelectedIndex
 
     def updateDocument(self):
@@ -54,3 +73,10 @@ class TabController(object):
         tabPage = self.tabControl.TabPages[index]
         textBox = tabPage.Controls[0]  # nb. python style subsetting
         self.document[index].text = textBox.Text
+
+    def deletePage(self):
+        if self.hasPages:
+            index = self.tabControl.SelectedIndex
+            del self.document[index]  # remove page from model
+            tabPage = self.tabControl.SelectedTab
+            self.tabControl.TabPages.Remove(tabPage)  # remove from view

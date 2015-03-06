@@ -46,7 +46,13 @@
     <Compile Include="opencommands.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="renamedialog.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="savecommands.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="tabcommands.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="tabcontroller.py">
