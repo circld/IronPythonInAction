@@ -4,7 +4,7 @@ import clr
 clr.AddReference('System.Drawing')
 clr.AddReference('System.Windows.Forms')
 
-from System.Drawing import Bitmap, Color, Size
+from System.Drawing import Bitmap, Color, Icon, Size
 from System.IO import Path
 from System.Windows.Forms import (
     Application, DockStyle, Form, 
@@ -18,6 +18,9 @@ from System.Windows.Forms import (
 from model import Document
 from opencommands import OpenCommand
 from savecommands import SaveCommand, SaveAsCommand
+from tabcommands import (
+    RemoveCommand, RenameCommand, NewPageCommand, NewDocumentCommand
+)
 from tabcontroller import TabController
 
 
@@ -29,6 +32,8 @@ executableDirectory = Path.GetDirectoryName(executablePath)
 
 class MyForm(Form):
 
+    iconPath = Path.Combine(executableDirectory, 'icons', 'icons')
+
     def __init__(self):
         self.Text = 'MultiDoc Editor'
         self.MinimumSize = Size(150, 150)
@@ -37,6 +42,9 @@ class MyForm(Form):
         self.tabControl.Dock = DockStyle.Fill
         self.tabControl.Alignment = TabAlignment.Bottom
         self.Controls.Add(self.tabControl)
+        self.Icon = Icon(
+            Path.Combine(executableDirectory, 'blue-documents-stack.ico')
+        )
 
         # all interaction with Document via controller
         self.tabController = TabController(tab)
@@ -53,19 +61,34 @@ class MyForm(Form):
         self.saveCommand = SaveCommand(tabC)
         self.saveAsCommand = SaveAsCommand(tabC)
         self.openCommand = OpenCommand(self)
+        self.removeCommand = RemoveCommand(tabC)
+        self.renameCommand = RenameCommand(tabC)
+        self.newPageCommand = NewPageCommand(tabC)
+        self.newDocumentCommand = NewDocumentCommand(tabC)
 
     def initializeToolbar(self):
-        self.iconPath = Path.Combine(executableDirectory, 'icons', 'icons')
         self.toolBar = ToolStrip()  # Toolbar (.NET 1.0) is apparently garbage
         self.toolBar.Dock = DockStyle.Top
         self.toolBar.GripStyle = ToolStripGripStyle.Hidden
         
+        self.addToolbarItem('New Doc', 
+                            lambda sender, event : self.newDocumentCommand.execute(),
+                            'book--plus.png')
+        self.addToolbarItem('New Page', 
+                            lambda sender, event : self.newPageCommand.execute(),
+                            'document--plus.png')
         self.addToolbarItem('Open', 
                             lambda sender, event : self.openCommand.execute(),
                             'folder-open.png')
         self.addToolbarItem('Save', 
                             lambda sender, event : self.saveCommand.execute(),
                             'disk-black.png')
+        self.addToolbarItem('Rename', 
+                            lambda sender, event : self.renameCommand.execute(),
+                            'document--pencil.png')
+        self.addToolbarItem('Remove', 
+                            lambda sender, event : self.removeCommand.execute(),
+                            'bin.png')
         self.Controls.Add(self.toolBar)
 
     def addToolbarItem(self, name, clickHandler, iconFile):
@@ -85,6 +108,12 @@ class MyForm(Form):
 
         fileMenu = self.createMenuItem('&File')
 
+        newDocKeys = Keys.Control | Keys.N
+        newDocMenuItem = self.createMenuItem(
+            '&New Document...',
+            handler=lambda sender, event : self.newDocumentCommand.execute(),
+            keys=newDocKeys
+        )
         openKeys = Keys.Control | Keys.O
         openMenuItem = self.createMenuItem(
             '&Open...',
@@ -106,11 +135,40 @@ class MyForm(Form):
             keys=saveAsKeys
         )
 
+        editMenu = self.createMenuItem('&Edit')
+
+        newPageKeys = Keys.Control | Keys.T
+        newPageMenuItem = self.createMenuItem(
+            'Add a new page...',
+            handler=lambda sender, event : self.newPageCommand.execute(),
+            keys=newPageKeys
+        )
+
+        removeKeys = Keys.Control | Keys.W
+        removeMenuItem = self.createMenuItem(
+            'Remove page...',
+            handler=lambda sender, event : self.removeCommand.execute(),
+            keys=removeKeys
+        )
+
+        renameKeys = Keys.Control | Keys.Space
+        renameMenuItem = self.createMenuItem(
+            'Rename page...',
+            handler=lambda sender, event : self.renameCommand.execute(),
+            keys=renameKeys
+        )
+
         # Add menu items to menu, menu to menus
+        fileMenu.DropDownItems.Add(newDocMenuItem)
         fileMenu.DropDownItems.Add(openMenuItem)
         fileMenu.DropDownItems.Add(saveMenuItem)
         fileMenu.DropDownItems.Add(saveAsMenuItem)
         menuStrip.Items.Add(fileMenu)
+
+        editMenu.DropDownItems.Add(newPageMenuItem)
+        editMenu.DropDownItems.Add(removeMenuItem)
+        editMenu.DropDownItems.Add(renameMenuItem)
+        menuStrip.Items.Add(editMenu)
 
         # Add to form controls
         self.Controls.Add(menuStrip)

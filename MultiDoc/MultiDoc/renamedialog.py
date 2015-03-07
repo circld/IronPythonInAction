@@ -1,7 +1,13 @@
+from os import getcwd
+from os.path import join
+
 import clr
 clr.AddReference('System.Drawing')
 clr.AddReference('System.Windows.Forms')
+# apparently doesn't check __file__ directory for DLL's
+clr.AddReferenceToFileAndPath(join(getcwd(), 'RenameTabDialog.dll'))
 
+from RenameTabDialog import RenameTabDialogBase
 from System.Windows.Forms import (
     Button, DockStyle, DialogResult, Form,
     FormBorderStyle, Padding, Panel, TextBox
@@ -9,53 +15,16 @@ from System.Windows.Forms import (
 from System.Drawing import Size
 
 
-class RenameTabDialog(Form):
+class RenameTabDialog(RenameTabDialogBase):
 
     def __init__(self, name, rename):
-        title = "Name Tab"
+        RenameTabDialogBase.__init__(self)
+
+        title = "Name tab"
         if rename:
-            title = 'Rename Tab'
+            title = "Rename Tab"
         self.Text = title
-        self.Size = Size(170, 85)
-        self.FormBorderStyle = FormBorderStyle.FixedDialog
-        self.ShowInTaskbar = False  # don't want dialog to appear in taskbar
-        self.Padding = Padding(5)
-
-        self.initializeTextBox(name)
-        self.initializeButtons()
-
-    def initializeTextBox(self, name):
-        self.textBox = TextBox()
         self.textBox.Text = name
-        self.textBox.Width = 160
-        self.Dock = DockStyle.Top
-
-        self.Controls.Add(self.textBox)
-
-    def initializeButtons(self):
-        buttonPanel = Panel()
-        buttonPanel.Height = 23
-        buttonPanel.Dock = DockStyle.Bottom
-        buttonPanel.Width = 170
-
-        # define custom buttons
-        acceptButton = Button()
-        acceptButton.Text = 'OK'
-        acceptButton.Width = 75
-        acceptButton.Dock = DockStyle.Left
-        acceptButton.DialogResult = DialogResult.OK
-        self.AcceptButton = acceptButton  # link to form
-        buttonPanel.Controls.Add(acceptButton)
-
-        cancelButton = Button()
-        cancelButton.Text = 'Cancel'
-        cancelButton.Width = 75
-        cancelButton.Dock = DockStyle.Right
-        cancelButton.DialogResult = DialogResult.Cancel
-        self.CancelButton = cancelButton  # link to form
-        buttonPanel.Controls.Add(cancelButton)
-
-        self.Controls.Add(buttonPanel)
 
 
 def ShowDialog(name, rename):

@@ -24,7 +24,8 @@ class TabController(object):
         if self.index == -1:
             self.index = self.tabControl.SelectedIndex = 0
         self.tabControl.SelectedIndexChanged += self.maintainIndex
-
+        print self.index
+        
     @property
     def hasPages(self):
         return self.tabControl.SelectedIndex != -1  # index = -1 if no pages
@@ -63,7 +64,7 @@ class TabController(object):
     def maintainIndex(self, sender, event):
         if self.hasPages:
             self.updateDocument()  # save currently selected page to model
-        self.index = self.tabControl.SelectedIndex
+            self.index = self.tabControl.SelectedIndex
 
     def updateDocument(self):
         """
@@ -79,4 +80,12 @@ class TabController(object):
             index = self.tabControl.SelectedIndex
             del self.document[index]  # remove page from model
             tabPage = self.tabControl.SelectedTab
+            self.index = index - 1
             self.tabControl.TabPages.Remove(tabPage)  # remove from view
+            self.tabControl.SelectedIndex = index - 1
+
+    def newPage(self, title):
+        self.document.addPage(title)
+        self.addTabPage(title, '')
+        newPageIndex = len(self.tabControl.TabPages) - 1
+        self.tabControl.SelectedIndex = newPageIndex  # select new page
