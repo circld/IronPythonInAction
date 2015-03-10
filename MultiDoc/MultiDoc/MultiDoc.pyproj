@@ -34,6 +34,9 @@
     <InterpreterReference Include="{80659ab7-4d53-4e0c-8588-a766116cbd46}\2.7" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="access_gui_ex.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="App\documentreader.py">
       <SubType>Code</SubType>
     </Compile>
@@ -61,6 +64,9 @@
     <Compile Include="App\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Scheduler.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Test\assemblies.py">
       <SubType>Code</SubType>
     </Compile>
@@ -71,6 +77,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Test\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="dep_injection_test.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="__init__.py">
