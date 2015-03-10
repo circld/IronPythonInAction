@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>2f5827ba-58b1-4b2c-80ba-5a67dc15b91e</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>MultiDoc.py</StartupFile>
+    <StartupFile>App\MultiDoc.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -28,39 +28,58 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="MultiDoc.py" />
+    <None Include="App\MultiDoc.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="{80659ab7-4d53-4e0c-8588-a766116cbd46}\2.7" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="documentreader.py">
+    <Compile Include="App\documentreader.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="documentwriter.py">
+    <Compile Include="App\documentwriter.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="model.py">
+    <Compile Include="App\model.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="opencommands.py">
+    <Compile Include="App\opencommands.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="renamedialog.py">
+    <Compile Include="App\renamedialog.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="savecommands.py">
+    <Compile Include="App\savecommands.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="tabcommands.py">
+    <Compile Include="App\tabcommands.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="tabcontroller.py">
+    <Compile Include="App\tabcontroller.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="xmldocumentreader.py">
+    <Compile Include="App\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Test\assemblies.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Test\unit_tests.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="App\xmldocumentreader.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Test\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App\" />
+    <Folder Include="Test\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
 </Project>
