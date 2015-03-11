@@ -5,7 +5,7 @@ clr.AddReference('System.Drawing')
 clr.AddReference('System.Windows.Forms')
 
 from System.Drawing import Bitmap, Color, Icon, Size
-from System.IO import Path
+from System.IO import Directory, Path
 from System.Windows.Forms import (
     Application, DockStyle, Form, 
     Keys, MenuStrip, TabAlignment, TabControl, 
@@ -32,7 +32,10 @@ executableDirectory = Path.GetDirectoryName(executablePath)
 
 class MyForm(Form):
 
-    iconPath = Path.Combine(executableDirectory, 'icons', 'icons')
+    iconPath = Path.Combine(
+         Directory.GetParent(executableDirectory).FullName, 
+         'icons', 'icons'
+    )
 
     def __init__(self):
         self.Text = 'MultiDoc Editor'

@@ -70,6 +70,9 @@
     <Compile Include="Test\assemblies.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Test\functional_tests.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Test\unit_tests.py">
       <SubType>Code</SubType>
     </Compile>

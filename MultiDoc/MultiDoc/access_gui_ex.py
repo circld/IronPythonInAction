@@ -21,13 +21,17 @@ def StartEventLoop():
     something.started = True
     Application.Run(f)
 
+# 1. Windows Forms event loop must be run in STA
+# 2. Windows Forms controls Invoke method executes on control thread
+# 3. Delegate CallTarget0 wraps function that take 0 args & pass
+#    to Invoke
 thread = Thread(ThreadStart(StartEventLoop))
 thread.SetApartmentState(ApartmentState.STA)  # Single Threaded Apartment
 thread.Start()
 
 # time for form to appear
 while not something.started:
-    Thread.CurrentThread.Join(100)  # what does Join do?
+    Thread.CurrentThread.Join(100)  # arg is timeout param
 
 def GetFormTitle():
     title = something.form.Text
@@ -36,9 +40,10 @@ def GetFormTitle():
 title = something.form.Invoke(CallTarget0(GetFormTitle))
 print title
 
+Thread.Sleep(3000)
+
 # CallTarget0(something.form.Close) doesn't work
 # apparently does not work when method has void return signature
 # http://lists.ironpython.com/pipermail/users-ironpython.com/2009-June/025456.html
-Thread.Sleep(3000)
 delegate = CallTarget0(lambda : something.form.Close())
 something.form.Invoke(delegate)

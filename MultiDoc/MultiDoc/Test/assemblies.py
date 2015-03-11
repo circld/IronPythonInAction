@@ -6,7 +6,7 @@ from System.Drawing import Bitmap, Color, Icon, Size
 from System.IO import Path, Directory
 from System.Windows.Forms import (
     Application, Button, DialogResult, DockStyle, 
-    Form, FormBorderStyle, Keys, MenuStrip, 
+    Form, FormBorderStyle, Keys, MenuStrip, MessageBox,
     Padding, Panel, ScrollBars, TabAlignment,
     TabPage, TabControl, TextBox,
     ToolStripItemDisplayStyle, ToolStrip,
